@@ -1363,10 +1363,10 @@ namespace Ionic.Zip
                     outFileName = Path.Combine(basedir, f);
 
                 // workitem 10639
-                outFileName = outFileName.Replace("/","\\");
+                outFileName = outFileName.Replace('/', Path.DirectorySeparatorChar);
 
                 // check if it is a directory
-                if ((IsDirectory) || (FileName.EndsWith("/")))
+                if ((IsDirectory) || (FileName.EndsWith(Path.DirectorySeparatorChar.ToString())))
                 {
                     if (!Directory.Exists(outFileName))
                     {
@@ -1387,7 +1387,7 @@ namespace Ionic.Zip
             if (outstream != null)
             {
                 outFileName = null;
-                if ((IsDirectory) || (FileName.EndsWith("/")))
+                if ((IsDirectory) || (FileName.EndsWith(Path.DirectorySeparatorChar.ToString())))
                 {
                     // extract a directory to streamwriter?  nothing to do!
                     return true;  // true == all done!  caller can return
