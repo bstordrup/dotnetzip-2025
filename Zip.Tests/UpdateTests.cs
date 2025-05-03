@@ -15,6 +15,7 @@
 //
 // ------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -2289,7 +2290,8 @@ namespace Ionic.Zip.Tests
             }
         }
 
-        [Fact]
+        // TODO: Create a similar test for Linux
+        [FactOnWindows]
         public void FromRoot_wi11988()
         {
             string marker = TestUtilities.GetMarker();
