@@ -15,7 +15,6 @@
 //
 // ------------------------------------------------------------------
 
-using System.Runtime.InteropServices;
 using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
