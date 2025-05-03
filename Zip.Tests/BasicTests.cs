@@ -1497,6 +1497,9 @@ namespace Ionic.Zip.Tests
         [Fact]
         public void CreateAndExtract_VerifyAttributes()
         {
+            // Fail if not either Windows or Linux
+            Assert.True(OperatingSystem.IsWindows () || OperatingSystem.IsLinux());
+
             try
             {
                 string zipFileToCreate = Path.Combine(TopLevelDir, "CreateAndExtract_VerifyAttributes.zip");
@@ -1505,30 +1508,45 @@ namespace Ionic.Zip.Tests
                 Directory.CreateDirectory(subdir);
 
                 //int fileCount = _rnd.Next(13) + 23;
-                FileAttributes[] attributeCombos = {
-                    FileAttributes.ReadOnly,
-                    FileAttributes.ReadOnly | FileAttributes.System,
-                    FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden,
-                    FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden | FileAttributes.Archive,
-                    FileAttributes.ReadOnly | FileAttributes.Hidden,
-                    FileAttributes.ReadOnly | FileAttributes.Hidden| FileAttributes.Archive,
-                    FileAttributes.ReadOnly | FileAttributes.Archive,
-                    FileAttributes.System,
-                    FileAttributes.System | FileAttributes.Hidden,
-                    FileAttributes.System | FileAttributes.Hidden | FileAttributes.Archive,
-                    FileAttributes.System | FileAttributes.Archive,
-                    FileAttributes.Hidden,
-                    FileAttributes.Hidden | FileAttributes.Archive,
-                    FileAttributes.Archive,
-                    FileAttributes.Normal,
-                    FileAttributes.NotContentIndexed | FileAttributes.ReadOnly,
-                    FileAttributes.NotContentIndexed | FileAttributes.System,
-                    FileAttributes.NotContentIndexed | FileAttributes.Hidden,
-                    FileAttributes.NotContentIndexed | FileAttributes.Archive,
-                    FileAttributes.Temporary,
-                    FileAttributes.Temporary | FileAttributes.Archive,
+                FileAttributes[] attributeCombos = (OperatingSystem.IsWindows (), OperatingSystem.IsLinux()) switch
+                {
+                    (true, _) =>    [
+                                        FileAttributes.ReadOnly,
+                                        FileAttributes.ReadOnly | FileAttributes.System,
+                                        FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden,
+                                        FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden | FileAttributes.Archive,
+                                        FileAttributes.ReadOnly | FileAttributes.Hidden,
+                                        FileAttributes.ReadOnly | FileAttributes.Hidden| FileAttributes.Archive,
+                                        FileAttributes.ReadOnly | FileAttributes.Archive,
+                                        FileAttributes.System,
+                                        FileAttributes.System | FileAttributes.Hidden,
+                                        FileAttributes.System | FileAttributes.Hidden | FileAttributes.Archive,
+                                        FileAttributes.System | FileAttributes.Archive,
+                                        FileAttributes.Hidden,
+                                        FileAttributes.Hidden | FileAttributes.Archive,
+                                        FileAttributes.Archive,
+                                        FileAttributes.Normal,
+                                        FileAttributes.NotContentIndexed | FileAttributes.ReadOnly,
+                                        FileAttributes.NotContentIndexed | FileAttributes.System,
+                                        FileAttributes.NotContentIndexed | FileAttributes.Hidden,
+                                        FileAttributes.NotContentIndexed | FileAttributes.Archive,
+                                        FileAttributes.Temporary,
+                                        FileAttributes.Temporary | FileAttributes.Archive,
+                                    ],
+                    (_, true) =>    [
+                                        FileAttributes.ReadOnly,
+                                        FileAttributes.Normal,
+                                        //FileAttributes.ReadOnly | FileAttributes.Hidden,
+                                        //FileAttributes.ReadOnly | FileAttributes.Compressed,
+                                        //FileAttributes.Hidden,
+                                        //FileAttributes.Compressed,
+                                    ],
+                    _ => [],  
                 };
                 int fileCount = attributeCombos.Length;
+
+                Assert.True(fileCount > 0, "No attributes returned indicating an unsupported OS.");
+                
                 string[] filesToZip = new string[fileCount];
                 _output.WriteLine("============\nCreating.");
                 for (int i = 0; i < fileCount; i++)
