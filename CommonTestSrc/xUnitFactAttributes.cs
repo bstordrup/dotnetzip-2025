@@ -18,18 +18,45 @@
 
 using System.Runtime.InteropServices;
 
-namespace Ionic.Zip.Tests.Utilities
+namespace Ionic.Zip.Tests.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    class FactOnWindowsAttribute : FactAttribute
+    /// <summary>
+    /// Base xUnit Fact for OS specific tests.
+    /// </summary>
+    class FactOnOsAttribute: FactAttribute
     {
-        public FactOnWindowsAttribute()
+        protected void Evaluate(OSPlatform targetOs)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (!RuntimeInformation.IsOSPlatform(targetOs))
             {
-                Skip = $"Skip because platform is not Windows";
+                Skip = $"Skip because platform is not {targetOs}";
             }
         }
+    }
+
+    /// <summary>
+    /// A xUnit Fact that specifically target Windows
+    /// </summary>
+    class FactOnWindowsAttribute: FactOnOsAttribute
+    {
+        public FactOnWindowsAttribute() => Evaluate(OSPlatform.Windows);
     }  
 
+    /// <summary>
+    /// A xUnit Fact that specifially target Linux
+    /// </summary>
+    class FactOnLinuxAttribute: FactOnOsAttribute
+    {
+        public FactOnLinuxAttribute() => Evaluate(OSPlatform.Linux);
+    }
+
+    class FactOnOSXAttribute: FactOnOsAttribute
+    {
+        public FactOnOSXAttribute() => Evaluate(OSPlatform.OSX);
+    }
+
+    class FactOnFreeBSDAttribute: FactOnOsAttribute
+    {
+        public FactOnFreeBSDAttribute() => Evaluate(OSPlatform.FreeBSD);
+    }
 }

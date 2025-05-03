@@ -16,6 +16,7 @@
 // ------------------------------------------------------------------
 
 using System.Runtime.InteropServices;
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -2290,14 +2291,20 @@ namespace Ionic.Zip.Tests
             }
         }
 
-        // TODO: Create a similar test for Linux
-        [FactOnWindows]
-        public void FromRoot_wi11988()
+        private (string marker, string zipFileToCreate, string dirToZip, string[] files) FromRoot_Common()
         {
             string marker = TestUtilities.GetMarker();
             string zipFileToCreate = Path.Combine(TopLevelDir, "FromRoot.zip");
             string dirToZip = Path.Combine(TopLevelDir, $"Fodder-{marker}");
             var files = TestUtilities.GenerateFilesFlat(dirToZip);
+            return (marker, zipFileToCreate, dirToZip, files);
+        }
+
+        [FactOnWindows]
+        public void FromRoot_Windows()
+        {
+            var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
+
             string windir = System.Environment.GetEnvironmentVariable("Windir");
             string substExe = Path.Combine(windir, "system32", "subst.exe");
             Assert.True(File.Exists(substExe), $"subst.exe does not exist ({substExe})");
@@ -2321,6 +2328,49 @@ namespace Ionic.Zip.Tests
             {
                 // remove the virt drive
                 this.Exec(substExe, "/D G:");
+            }
+        }
+
+        [FactOnLinux]
+        public void FromRoot_Linux()
+        {
+            var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
+
+            try
+            {
+                /*
+                    The way to do the same thing as subst in Linux is to create a symbolic link
+                    using the `ln -s <path to the actual folder> <the symbolic link>`
+
+                    To mimic the Windows test, the command would be
+
+                    `ln -s <dirToZip> ~/G_drive`
+
+                    which will create the link `G_drive` in the users home folder.
+                */
+                this.Exec("ln", $"-s {dirToZip} ./G_drive");
+
+                using (var zip = new ZipFile())
+                {
+                    zip.UpdateSelectedFiles("*.*", "./G_drive", "", true);
+                    zip.Save(zipFileToCreate);
+                }
+
+                Assert.Equal<int>(files.Length, CountEntries(zipFileToCreate));
+                Assert.True(files.Length > 3);
+                BasicVerifyZip(zipFileToCreate);
+            }
+            finally
+            {
+                /*
+                    Removing the symbolic link is a plain `rm <the symbolic link>` command.
+
+                    To delete the link created above is this:
+
+                    `rm ~/G_drive`
+                */
+                // Remove the symlink
+                this.Exec("rm", "./G_drive");
             }
         }
     }
