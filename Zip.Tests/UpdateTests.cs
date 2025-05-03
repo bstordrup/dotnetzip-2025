@@ -2301,7 +2301,7 @@ namespace Ionic.Zip.Tests
         }
 
         [FactOnWindows]
-        public void FromRoot_Windows()
+        public void FromRoot_wi11988_Windows()
         {
             var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
 
@@ -2332,7 +2332,7 @@ namespace Ionic.Zip.Tests
         }
 
         [FactOnLinux]
-        public void FromRoot_Linux()
+        public void FromRoot_wi11988_Linux()
         {
             var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
 
