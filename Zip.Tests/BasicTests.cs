@@ -1685,14 +1685,32 @@ namespace Ionic.Zip.Tests
         public void CreateZip_VerifyFileLastModified()
         {
             string zipFileToCreate = Path.Combine(TopLevelDir, "CreateZip_VerifyFileLastModified.zip");
-            string envTemp = Environment.GetEnvironmentVariable("TEMP");
-            String[] candidateFileNames = Directory.GetFiles(envTemp);
+            string folder = "";
+            if (OperatingSystem.IsWindows())
+            {
+                folder = Environment.GetEnvironmentVariable("TEMP");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            }
+            String[] candidateFileNames = OperatingSystem.IsLinux () switch
+            {
+                false => Directory.GetFiles(folder),
+                true  => Directory.GetFiles(folder, "*", new EnumerationOptions 
+                            { 
+                                AttributesToSkip = FileAttributes.Hidden,
+                                IgnoreInaccessible = true,
+                                ReturnSpecialDirectories = false,
+                                RecurseSubdirectories = true
+                            })
+            };
             var checksums = new Dictionary<string, byte[]>();
             var timestamps = new Dictionary<string, DateTime>();
             var actualFilenames = new List<string>();
             var excludedFilenames = new List<string>();
             _output.WriteLine("\n-----------------------------\n: Found {0} files in '{1}'...",
-                candidateFileNames.Length, envTemp);
+                candidateFileNames.Length, folder);
 
             int maxFiles = _rnd.Next(candidateFileNames.Length / 2) + candidateFileNames.Length / 3;
             maxFiles = Math.Min(maxFiles, 145);
