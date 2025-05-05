@@ -1541,12 +1541,12 @@ namespace Ionic.Zip.Tests
                                         //FileAttributes.Hidden,
                                         //FileAttributes.Compressed,
                                     ],
-                    _ => [],  
+                    _ => [],
                 };
                 int fileCount = attributeCombos.Length;
 
                 Assert.True(fileCount > 0, "No attributes returned indicating an unsupported OS.");
-                
+
                 string[] filesToZip = new string[fileCount];
                 _output.WriteLine("============\nCreating.");
                 for (int i = 0; i < fileCount; i++)
@@ -1650,7 +1650,7 @@ namespace Ionic.Zip.Tests
                                     //FileAttributes.Hidden,
                                     //FileAttributes.Compressed,
                                 ],
-                _ => [],  
+                _ => [],
             };
             int fileCount = attributeCombos.Length;
 
@@ -1706,23 +1706,31 @@ namespace Ionic.Zip.Tests
             string folder = "";
             if (OperatingSystem.IsWindows())
             {
-                folder = Environment.GetEnvironmentVariable("TEMP");
+                //folder = Environment.GetEnvironmentVariable("TEMP");
+                folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             }
             else if (OperatingSystem.IsLinux())
             {
                 folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             }
-            String[] candidateFileNames = OperatingSystem.IsLinux () switch
+            string[] candidateFileNames = Directory.GetFiles(folder, "*", new EnumerationOptions
             {
-                false => Directory.GetFiles(folder),
-                true  => Directory.GetFiles(folder, "*", new EnumerationOptions 
-                            { 
-                                AttributesToSkip = FileAttributes.Hidden,
-                                IgnoreInaccessible = true,
-                                ReturnSpecialDirectories = false,
-                                RecurseSubdirectories = true
-                            })
-            };
+                AttributesToSkip = FileAttributes.Hidden,
+                IgnoreInaccessible = true,
+                ReturnSpecialDirectories = false,
+                RecurseSubdirectories = OperatingSystem.IsLinux()
+            });
+            //String[] candidateFileNames = OperatingSystem.IsLinux () switch
+            //{
+            //    false => Directory.GetFiles(folder),
+            //    true  => Directory.GetFiles(folder, "*", new EnumerationOptions
+            //                {
+            //                    AttributesToSkip = FileAttributes.Hidden,
+            //                    IgnoreInaccessible = true,
+            //                    ReturnSpecialDirectories = false,
+            //                    RecurseSubdirectories = true
+            //                })
+            //};
             var checksums = new Dictionary<string, byte[]>();
             var timestamps = new Dictionary<string, DateTime>();
             var actualFilenames = new List<string>();
