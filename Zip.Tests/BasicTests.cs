@@ -1324,29 +1324,35 @@ namespace Ionic.Zip.Tests
 
             // now extract the files into memory streams, checking only the length of the file.
             // We do 4 combinations:  case-sensitive on or off, and filename conversion on or off.
-            for (int m = 0; m < 2; m++)
+            foreach (bool bConvertToUpper in new[] { false, true })
             {
-                for (int n = 0; n < 2; n++)
+                foreach  (bool bCaseSensitiveRetrieval in new[] { false, true })
                 {
                     using (ZipFile zip2 = ZipFile.Read(zipFileToCreate))
                     {
-                        if (n == 1) zip2.CaseSensitiveRetrieval = true;
+                        zip2.CaseSensitiveRetrieval = bCaseSensitiveRetrieval;
                         foreach (string s in zip2.EntryFileNames)
                         {
-                            var s2 = (m == 1) ? s.ToUpper() : s;
+                            var s2 = bConvertToUpper ? s.ToUpper() : s;
                             using (MemoryStream ms = new MemoryStream())
                             {
                                 try
                                 {
                                     zip2[s2].Extract(ms);
                                     byte[] a = ms.ToArray();
-                                    string f = Path.Combine(subdir, s2);
+                                    /*
+                                        Use unchanged filename becuase the original file has not changed casing. And
+                                        Linux is case sensitive in file sytem, so the new FileInfo(f) will fail
+                                        if using the upper case filename.
+                                    */
+                                    string f = Path.Combine(subdir, s);
                                     var fi = new FileInfo(f);
                                     Assert.Equal<int>((int)(fi.Length), a.Length, "Unequal file lengths.");
                                 }
                                 catch
                                 {
-                                    Assert.Equal<int>(1, n * m, "Indexer retrieval failed unexpectedly.");
+                                    var actual = (bConvertToUpper ? 1 : 0) * (bCaseSensitiveRetrieval ? 1 : 0);
+                                    Assert.Equal<int>(1, actual, "Indexer retrieval failed unexpectedly.");
                                 }
                             }
                         }
