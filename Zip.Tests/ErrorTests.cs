@@ -289,11 +289,12 @@ namespace Ionic.Zip.Tests
             string sourceDir = TestUtilities.GetTestSrcDir();
 
             // the list of filenames to add to the zip
+            // Create paths being compatible with both Linux and Windows
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..\\Tools\\dnzgzip\\bin\\Debug\\net9.0\\dnzgzip.exe"),
-                Path.Combine(sourceDir, "..\\LICENSE.txt"),
-                Path.Combine(sourceDir, "..\\CommonTestSrc\\TestUtilities.cs"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"),
+                Path.Combine(sourceDir, "..", "LICENSE.txt"),
+                Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),
             };
 
             using (ZipFile zip = new ZipFile())
