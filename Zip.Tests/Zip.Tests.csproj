@@ -43,6 +43,9 @@
     <Compile Include="..\CommonTestSrc\xUnitFactAttributes.cs">
       <Link>xUnitFactAttributes.cs</Link>
     </Compile>
+    <Compile Include="..\CommonTestSrc\LinuxTestUtilities.cs">
+      <Link>LinuxTestUtilities</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

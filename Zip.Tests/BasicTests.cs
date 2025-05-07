@@ -27,6 +27,9 @@ using RE = System.Text.RegularExpressions;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.IO.Enumeration;
 
 namespace Ionic.Zip.Tests
 {
@@ -1708,27 +1711,33 @@ namespace Ionic.Zip.Tests
         //[Timeout(1000 * 240)]  // timeout in ms.  240s = 4 mins
         public void CreateZip_VerifyFileLastModified()
         {
+            // Local function to test if a filename is to be excluded based on operating system.
+            bool isExcludedByOperatingSystem(string filename)
+            {
+                if (OperatingSystem.IsLinux())
+                {
+                    // Test if the file is a special file type.
+                    var linuxLsRes = this.Exec("ls", $"-l \"{filename}\"");
+                    return LinuxTestUtilities.IsSpecialFile(linuxLsRes);
+                }
+                else
+                    return false;
+            }
+
+
             string zipFileToCreate = Path.Combine(TopLevelDir, "CreateZip_VerifyFileLastModified.zip");
-            string folder = "";
-            if (OperatingSystem.IsWindows())
-            {
-                //folder = Environment.GetEnvironmentVariable("TEMP");
-                folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            }
-            else if (OperatingSystem.IsLinux())
-            {
-                folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            }
-            folder = Environment.GetEnvironmentVariable("TEMP");
-            string[] filesInFolder = Directory.GetFiles(folder, "*", new EnumerationOptions
-            {
-                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System | FileAttributes.Device,
-                IgnoreInaccessible = true,
-                MatchType = MatchType.Simple,
-                MatchCasing = MatchCasing.PlatformDefault,
-                ReturnSpecialDirectories = false,
-                RecurseSubdirectories = OperatingSystem.IsLinux()
-            });
+            //string folder = "";
+            // if (OperatingSystem.IsWindows())
+            // {
+            //     //folder = Environment.GetEnvironmentVariable("TEMP");
+            //     folder = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            // }
+            // else if (OperatingSystem.IsLinux())
+            // {
+            //     folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            // }
+            string folder = Environment.GetEnvironmentVariable("TEMP");
+            string[] filesInFolder = Directory.GetFiles(folder);
             var candidateFileNames = (from potentialFile in filesInFolder
                                       let lastWrite = File.GetLastWriteTime(potentialFile)
                                       let plainFileName = Path.GetFileName(potentialFile)
@@ -1736,106 +1745,41 @@ namespace Ionic.Zip.Tests
                                             plainFileName != "dd_BITS.log" &&
                                             !(lastWrite.Year == DateTime.Now.Year && lastWrite.Month == DateTime.Now.Month && lastWrite.Day == DateTime.Now.Day)
                                       let fi = new FileInfo(potentialFile)
-                                      where  fi.Length < 10000000
-                                      select new
-                                      {
-                                        FileName = potentialFile,
-                                        TimeStamp = AdjustTime_Win32ToDotNet(lastWrite),
-                                        CheckSum = TestUtilities.ComputeChecksum(potentialFile)
-                                      }).ToArray();
-            // var checksums = new Dictionary<string, byte[]>();
-            // var timestamps = new Dictionary<string, DateTime>();
-            // var actualFilenames = new List<string>();
-            //var excludedFilenames = new List<string>();
-            _output.WriteLine("\n-----------------------------\n: Found {0} files in '{1}'...",
-                candidateFileNames.Length, folder);
+                                      where fi.Length < 10000000 && 
+                                            !isExcludedByOperatingSystem(potentialFile)
+                                      select potentialFile).ToList();
 
-            int maxFiles = _rnd.Next(candidateFileNames.Length / 2) + candidateFileNames.Length / 3;
+            _output.WriteLine("\n-----------------------------\n: Found {0} files in '{1}'...",
+                candidateFileNames.Count, folder);
+
+            int maxFiles = _rnd.Next(candidateFileNames.Count / 2) + candidateFileNames.Count / 3;
             maxFiles = Math.Min(maxFiles, 145);
             //maxFiles = Math.Min(maxFiles, 15);
             _output.WriteLine("\n{0}: Selecting {1} files...", DateTime.Now.ToString("HH:mm:ss"), maxFiles);
 
-            var actualFileNames = candidateFileNames.Take(maxFiles).ToList();
+            var actualFilenames = candidateFileNames.OrderBy(x => _rnd.Next()).Take(maxFiles).ToList();
+            var rawData = (from f in actualFilenames
+                          let lastWrite = File.GetLastWriteTime(f)
+                          select new
+                          {
+                             filename = Path.GetFileName(f),
+                             chk = TestUtilities.ComputeChecksum(f),
+                             timestamp = AdjustTime_Win32ToDotNet(lastWrite)
+                          });
+            var checksums = rawData.ToDictionary(rd => rd.filename, rd => rd.chk);
+            var timestamps = rawData.ToDictionary(rd => rd.filename, rd => rd.timestamp);
 
-            // do
-            // {
-            //     string filename = null;
-            //     bool foundOne = false;
-            //     while (!foundOne)
-            //     {
-            //         filename = candidateFileNames[_rnd.Next(candidateFileNames.Length)];
-            //         if (excludedFilenames.Contains(filename)) continue;
-            //         var fi = new FileInfo(filename);
-
-            //         if (Path.GetFileName(filename)[0] == '~'
-            //             || actualFilenames.Contains(filename)
-            //             || fi.Length > 10000000
-            //             || Path.GetFileName(filename) == "dd_BITS.log"
-            //             // There WERE some weird files on my system that cause this
-            //             // test to fail!  the GetLastWrite() method returns the
-            //             // "wrong" time - does not agree with what is shown in
-            //             // Explorer or in a cmd.exe dir output.  So I exclude those
-            //             // files here.  (This is no longer a problem?)
-
-            //             //|| filename.EndsWith(".cer")
-            //             //|| filename.EndsWith(".msrcincident")
-            //             //|| filename == "MSCERTS.ini"
-            //             )
-            //         {
-            //             excludedFilenames.Add(filename);
-            //         }
-            //         else
-            //         {
-            //             foundOne = true;
-            //         }
-            //     }
-
-            //     var key = Path.GetFileName(filename);
-
-            //     // surround this in a try...catch so as to avoid grabbing a file that is open by someone else, or has disappeared
-            //     try
-            //     {
-            //         var lastWrite = File.GetLastWriteTime(filename);
-            //         var fi = new FileInfo(filename);
-
-            //         // // Rounding to nearest even second was necessary when DotNetZip did
-            //         // // not process NTFS times in the NTFS Extra field. Since v1.8.0.5,
-            //         // // this is no longer the case.
-            //         // //
-            //         // // var tm = TestUtilities.RoundToEvenSecond(lastWrite);
-
-            //         var tm = lastWrite;
-            //         // // hop out of the try block if the file is from TODAY.  (heuristic
-            //         // // to avoid currently open files)
-            //         // if ((tm.Year == DateTime.Now.Year) && (tm.Month == DateTime.Now.Month) && (tm.Day == DateTime.Now.Day))
-            //         //     throw new Exception();
-            //         var chk = TestUtilities.ComputeChecksum(filename);
-            //         checksums.Add(key, chk);
-            //         _output.WriteLine("  {4}:  {1}  {2}  {3,-9}  {0}",
-            //                               Path.GetFileName(filename),
-            //                               lastWrite.ToString("yyyy MMM dd HH:mm:ss"),
-            //                               tm.ToString("yyyy MMM dd HH:mm:ss"),
-            //                               fi.Length,
-            //                               DateTime.Now.ToString("HH:mm:ss"));
-            //         timestamps.Add(key, this.AdjustTime_Win32ToDotNet(tm));
-            //         actualFilenames.Add(filename);
-            //     }
-            //     catch
-            //     {
-            //         excludedFilenames.Add(filename);
-            //     }
-            // } while ((actualFilenames.Count < maxFiles) && (actualFilenames.Count < candidateFileNames.Length) &&
-            //          actualFilenames.Count + excludedFilenames.Count < candidateFileNames.Length);
+            Assert.Equal(checksums.Keys, timestamps.Keys);
 
             _output.WriteLine("{0}: Creating zip...", DateTime.Now.ToString("HH:mm:ss"));
 
             // create the zip file
             using (ZipFile zip = new ZipFile())
             {
-                foreach (var f in actualFileNames)
+                foreach (var s in actualFilenames)
                 {
-                    ZipEntry e = zip.AddFile(f.FileName, "");
-                    e.Comment = f.TimeStamp.ToString("yyyyMMMdd HH:mm:ss");
+                    ZipEntry e = zip.AddFile(s, "");
+                    e.Comment = File.GetLastWriteTime(s).ToString("yyyyMMMdd HH:mm:ss");
                 }
                 zip.Comment = "The files in this archive will be checked for LastMod timestamp and checksum.";
                 _output.WriteLine("{0}: Saving zip....", DateTime.Now.ToString("HH:mm:ss"));
@@ -1857,7 +1801,7 @@ namespace Ionic.Zip.Tests
                     e.Extract(unpackDir);
                     string pathToExtractedFile = Path.Combine(unpackDir, e.FileName);
                     DateTime actualFilesystemLastMod = AdjustTime_Win32ToDotNet(File.GetLastWriteTime(pathToExtractedFile));
-                    TimeSpan delta = actualFileNames[entries].TimeStamp /* timestamps[e.FileName]*/ - actualFilesystemLastMod;
+                    TimeSpan delta = timestamps[e.FileName] - actualFilesystemLastMod;
 
                     // get the delta as an absolute value:
                     if (delta < new TimeSpan(0, 0, 0))
@@ -1868,13 +1812,13 @@ namespace Ionic.Zip.Tests
                     Assert.True(delta < new TimeSpan(0, 0, 1),
                         String.Format("Unexpected LastMod timestamp on extracted filesystem file ({0}) expected({1}) actual({2})  delta({3}).",
                                   pathToExtractedFile,
-                                  actualFileNames[entries].TimeStamp.ToString("F"),
+                                  timestamps[e.FileName].ToString("F"),
                                   actualFilesystemLastMod.ToString("F"),
                                   delta.ToString()
                         ));
 
                     // verify the checksum of the file is correct
-                    string expectedCheckString = TestUtilities.CheckSumToString(actualFileNames[entries].CheckSum); // checksums[e.FileName]);
+                    string expectedCheckString = TestUtilities.CheckSumToString(checksums[e.FileName]);
                     string actualCheckString = TestUtilities.GetCheckSumString(pathToExtractedFile);
                     Assert.Equal<String>
                         (expectedCheckString,
@@ -1884,7 +1828,7 @@ namespace Ionic.Zip.Tests
                     entries++;
                 }
             }
-            Assert.Equal<int>(entries, actualFileNames.Count(), "Unexpected file count.");
+            Assert.Equal<int>(entries, actualFilenames.Count(), "Unexpected file count.");
         }
 
 
