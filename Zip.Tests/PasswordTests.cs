@@ -338,8 +338,8 @@ namespace Ionic.Zip.Tests
 
             string[] filenames =
             {
-                Path.Combine(dnzSolutionDir, "Tools\\dnzzip\\bin\\Debug\\net9.0\\dnzzip.exe"),
-                Path.Combine(dnzSolutionDir, "Zip\\ZipFile.cs"),
+                Path.Combine(dnzSolutionDir, "Tools", "dnzzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzzip")),
+                Path.Combine(dnzSolutionDir, "Zip", "ZipFile.cs"),
             };
 
             foreach (string f in filenames)
