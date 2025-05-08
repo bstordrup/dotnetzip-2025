@@ -651,7 +651,7 @@ namespace Ionic.Zip.Tests
             // the list of filenames to add to the zip
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzgzip)"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzgzip")),
                 Path.Combine(sourceDir, "..", "LICENSE.txt"),
                 Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),
             };
