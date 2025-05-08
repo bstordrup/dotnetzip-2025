@@ -403,7 +403,16 @@ namespace Ionic.Zip.Tests
         [Fact]
         public void Save_InvalidLocation()
         {
-            string not_a_file_name = "c:\\Windows\\";
+            string not_a_file_name_os_dependant()
+            {
+                if (OperatingSystem.IsLinux())
+                {
+                    return "/usr/lib/";
+                }
+                return "c:\\Windows\\";
+            }
+
+            string not_a_file_name = not_a_file_name_os_dependant();
             Assert.True(Directory.Exists(not_a_file_name));
 
             // Add an entry to the zipfile, then try saving to a directory.
@@ -576,7 +585,7 @@ namespace Ionic.Zip.Tests
             Assert.NotNull(gzip);
             File.Copy(gzip, filename);
             Assert.True(File.Exists(filename));
-            Assert.Throws<System.IO.IOException>(() =>
+            Assert.Throws<System.IO.DirectoryNotFoundException>(() =>
             {
                 using (ZipFile zip = new ZipFile())
                 {
