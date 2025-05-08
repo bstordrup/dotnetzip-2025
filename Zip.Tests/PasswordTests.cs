@@ -409,8 +409,8 @@ namespace Ionic.Zip.Tests
 
             string[] filenames =
             {
-                Path.Combine(dnzSolutionDir, "Tools\\dnzzip\\bin\\Debug\\net9.0\\dnzzip.exe"),
-                Path.Combine(dnzSolutionDir, "Zip\\Zipfile.cs"),
+                Path.Combine(dnzSolutionDir, "Tools", "dnzzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzzip")),
+                Path.Combine(dnzSolutionDir, "Zip", "ZipFile.cs"),
             };
 
             foreach (string f in filenames)
@@ -464,8 +464,8 @@ namespace Ionic.Zip.Tests
 
             string[] filenames =
             {
-                Path.Combine(dnzSolutionDir, "Tools\\dnzgzip\\GZip.cs"),
-                Path.Combine(dnzSolutionDir, "Zip\\bin\\Debug\\net9.0\\Ionic.Zip.pdb"),
+                Path.Combine(dnzSolutionDir, "Tools", "dnzgzip", "GZip.cs"),
+                Path.Combine(dnzSolutionDir, "Zip", "bin", "Debug", "netstandard2.0", "Ionic.Zip.pdb"),
             };
 
             foreach (string f in filenames)
@@ -491,7 +491,7 @@ namespace Ionic.Zip.Tests
 
             string additionalFile = Path.Combine(
                 dnzSolutionDir,
-                "Tools\\dnzunzip\\bin\\Debug\\net9.0\\dnzunzip.exe"
+                "Tools", "dnzunzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzunzip")
             );
             Assert.True(
                 File.Exists(additionalFile),
@@ -581,7 +581,7 @@ namespace Ionic.Zip.Tests
                             _output.WriteLine("Selected entry: {0}", zip[ix].FileName);
                             extractedFile = Path.Combine(
                                 extractDir,
-                                zip[ix].FileName.Replace("/", "\\")
+                                zip[ix].FileName.Replace('/', Path.DirectorySeparatorChar)
                             );
                             _output.WriteLine("name for extracted file: {0}", extractedFile);
                             Assert.False(File.Exists(extractedFile), "The file exists.");
