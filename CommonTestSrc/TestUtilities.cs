@@ -19,6 +19,7 @@
 using System.Text.RegularExpressions;
 using System.Text;
 using Xunit.Abstractions;
+using System.Runtime.InteropServices;
 
 namespace Ionic.Zip.Tests.Utilities
 {
@@ -746,6 +747,18 @@ namespace Ionic.Zip.Tests.Utilities
                 if (update != null) update(2,i,numFilesToCreate);
             }
             return filesToZip;
+        }
+
+        internal static string GetExecutableName(string executableWithoutExtension)
+        {
+            if (OperatingSystem.IsLinux())
+            {
+                return executableWithoutExtension;
+            }
+            if (OperatingSystem.IsWindows())
+            {
+                return $"{executableWithoutExtension}.exe";
+            }
         }
 
 

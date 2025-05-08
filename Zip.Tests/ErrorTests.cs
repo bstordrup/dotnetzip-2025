@@ -293,7 +293,7 @@ namespace Ionic.Zip.Tests
             // Create paths being compatible with both Linux and Windows
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzgzip")),
                 Path.Combine(sourceDir, "..", "LICENSE.txt"),
                 Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),
             };
@@ -651,7 +651,7 @@ namespace Ionic.Zip.Tests
             // the list of filenames to add to the zip
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzgzip)"),
                 Path.Combine(sourceDir, "..", "LICENSE.txt"),
                 Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),
             };
@@ -712,7 +712,7 @@ namespace Ionic.Zip.Tests
             // the list of filenames to add to the zip
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzgzip")),
                 Path.Combine(sourceDir, "data", "wi8647.tif"),
                 Path.Combine(sourceDir, "..", "Zip", "bin", "Debug", "netstandard2.0", "Ionic.Zip.dll"),
                 Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),

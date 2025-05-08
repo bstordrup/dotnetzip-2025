@@ -235,7 +235,7 @@ namespace Ionic.Zip.Tests.Utilities
                         "bin", 
                         "Debug", 
                         "net9.0", 
-                        $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"
+                        TestUtilities.GetExecutableName("dnzgzip")
                     );
 
                     _GZipIsPresent = new Nullable<bool>(File.Exists(_gzip));
