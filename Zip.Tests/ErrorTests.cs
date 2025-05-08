@@ -17,6 +17,7 @@
 //
 // ------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using System.Text;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
@@ -650,9 +651,9 @@ namespace Ionic.Zip.Tests
             // the list of filenames to add to the zip
             string[] filenames =
             {
-                Path.Combine(sourceDir, "..\\Tools\\dnzgzip\\bin\\Debug\\net9.0\\dnzgzip.exe"),
-                Path.Combine(sourceDir, "..\\LICENSE.txt"),
-                Path.Combine(sourceDir, "..\\CommonTestSrc\\TestUtilities.cs"),
+                Path.Combine(sourceDir, "..", "Tools", "dnzgzip", "bin", "Debug", "net9.0", $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"),
+                Path.Combine(sourceDir, "..", "LICENSE.txt"),
+                Path.Combine(sourceDir, "..", "CommonTestSrc", "TestUtilities.cs"),
             };
 
             // passwords to use for those entries
