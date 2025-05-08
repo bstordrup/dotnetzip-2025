@@ -755,10 +755,8 @@ namespace Ionic.Zip.Tests.Utilities
             {
                 return executableWithoutExtension;
             }
-            if (OperatingSystem.IsWindows())
-            {
-                return $"{executableWithoutExtension}.exe";
-            }
+
+            return $"{executableWithoutExtension}.exe";
         }
 
 
