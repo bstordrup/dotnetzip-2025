@@ -229,7 +229,13 @@ namespace Ionic.Zip.Tests.Utilities
                     string sourceDir = TestUtilities.GetTestSrcDir();
                     _gzip = Path.Combine(
                         sourceDir,
-                        "..\\Tools\\dnzgzip\\bin\\Debug\\net9.0\\dnzgzip.exe"
+                        "..", 
+                        "Tools", 
+                        "dnzgzip", 
+                        "bin", 
+                        "Debug", 
+                        "net9.0", 
+                        $"dnzgzip{(OperatingSystem.IsWindows() ? ".exe" : "")}"
                     );
 
                     _GZipIsPresent = new Nullable<bool>(File.Exists(_gzip));
