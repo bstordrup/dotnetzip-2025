@@ -1067,7 +1067,7 @@ namespace Ionic.Zip.Tests
                 foreach (var e in zip1)
                 {
                     _output.WriteLine("entry {0}", e.FileName);
-                    string p = Path.GetDirectoryName(e.FileName.Replace("/", "\\"));
+                    string p = Path.GetDirectoryName(e.FileName.Replace('/', Path.DirectorySeparatorChar));
                     if (!dirs.Contains(p))
                         dirs.Add(p);
                 }
@@ -1082,7 +1082,7 @@ namespace Ionic.Zip.Tests
                 {
                     string d = dirs[j];
                     if (i == 1)
-                        d += "\\";
+                        d += Path.DirectorySeparatorChar;
                     _output.WriteLine("====================================================");
                     _output.WriteLine(
                         "Reading zip, ExtractSelectedEntries() by name, with directoryInArchive({0})...",
