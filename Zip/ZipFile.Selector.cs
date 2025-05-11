@@ -27,6 +27,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Ionic.Zip
 {
@@ -629,8 +630,8 @@ namespace Ionic.Zip
 
         private string EnsureendInSlash(string s)
         {
-            if (s.EndsWith("\\")) return s;
-            return s + "\\";
+            if (s.EndsWith($"{Path.DirectorySeparatorChar}")) return s;
+            return s + Path.DirectorySeparatorChar;
         }
 
         private void _AddOrUpdateSelectedFiles(String selectionCriteria,
@@ -639,6 +640,13 @@ namespace Ionic.Zip
                                                bool recurseDirectories,
                                                bool wantUpdate)
         {
+            //Start by replacing \ with Path.DirectorySeparatorChar n Linux.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                selectionCriteria = selectionCriteria.Replace('\\', Path.DirectorySeparatorChar);
+            }
+            System.Diagnostics.Debug.WriteLine($"selectionCriteria: {selectionCriteria}");
+
             if (directoryOnDisk == null && (Directory.Exists(selectionCriteria)))
             {
                 directoryOnDisk = selectionCriteria;
@@ -650,7 +658,7 @@ namespace Ionic.Zip
             }
 
             // workitem 9176
-            while (directoryOnDisk.EndsWith("\\")) directoryOnDisk = directoryOnDisk.Substring(0, directoryOnDisk.Length - 1);
+            while (directoryOnDisk.EndsWith($"{Path.DirectorySeparatorChar}")) directoryOnDisk = directoryOnDisk.Substring(0, directoryOnDisk.Length - 1);
             if (Verbose) StatusMessageTextWriter.WriteLine("adding selection '{0}' from dir '{1}'...",
                                                                selectionCriteria, directoryOnDisk);
             Ionic.FileSelector ff = new Ionic.FileSelector(selectionCriteria,
@@ -1247,7 +1255,7 @@ namespace Ionic
         internal override bool Evaluate(Ionic.Zip.ZipEntry entry)
         {
             // swap forward slashes in the entry.FileName for backslashes
-            string transformedFileName = entry.FileName.Replace("/", "\\");
+            string transformedFileName = entry.FileName.Replace('/', Path.DirectorySeparatorChar);
 
             return _Evaluate(transformedFileName);
         }
@@ -1431,11 +1439,11 @@ namespace Ionic
 
             var list = new List<Ionic.Zip.ZipEntry>();
             // workitem 8559
-            string slashSwapped = (directoryPathInArchive == null) ? null : directoryPathInArchive.Replace("/", "\\");
+            string slashSwapped = (directoryPathInArchive == null) ? null : directoryPathInArchive.Replace('/', Path.DirectorySeparatorChar);
             // workitem 9174
             if (slashSwapped != null)
             {
-                while (slashSwapped.EndsWith("\\"))
+                while (slashSwapped.EndsWith($"{Path.DirectorySeparatorChar}"))
                     slashSwapped = slashSwapped.Substring(0, slashSwapped.Length - 1);
             }
             foreach (Ionic.Zip.ZipEntry e in zip)

@@ -16,6 +16,7 @@
 //
 // ------------------------------------------------------------------
 
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -681,12 +682,18 @@ namespace Ionic.Zip.Tests
                 }
             );
 
-            var txtFiles = Directory.GetFiles(dirToZip, "*.txt", SearchOption.AllDirectories);
+            /*
+                What is the purpose of the test?
+
+                On Windows, using search pattern *.txt will find files named *.TXT, and the Assert.True succeeds.
+                On Linux, using search pattern *.txt will not find files named *.TXT, and the Asert.True fails.
+             */
+            var txtFiles = Directory.GetFiles(dirToZip, "*.TXT", SearchOption.AllDirectories);
             Assert.True(txtFiles.Length > 3, $"not enough entries (n={txtFiles.Length})");
 
             using (ZipFile zip1 = new ZipFile())
             {
-                zip1.AddSelectedFiles("*.txt", dirToZip, Path.GetFileName(dirToZip));
+                zip1.AddSelectedFiles("*.TXT", dirToZip, Path.GetFileName(dirToZip));
                 zip1.Save(zipFileToCreate);
             }
 

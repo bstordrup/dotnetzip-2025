@@ -30,6 +30,8 @@ using Assert = XunitAssertMessages.AssertM;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.IO.Enumeration;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace Ionic.Zip.Tests
 {
@@ -1507,7 +1509,7 @@ namespace Ionic.Zip.Tests
         public void CreateAndExtract_VerifyAttributes()
         {
             // Fail if not either Windows or Linux
-            Assert.True(OperatingSystem.IsWindows () || OperatingSystem.IsLinux());
+            Assert.True(OS == OSPlatform.Windows || OS == OSPlatform.Linux);
 
             try
             {
@@ -1517,9 +1519,9 @@ namespace Ionic.Zip.Tests
                 Directory.CreateDirectory(subdir);
 
                 //int fileCount = _rnd.Next(13) + 23;
-                FileAttributes[] attributeCombos = (OperatingSystem.IsWindows (), OperatingSystem.IsLinux()) switch
+                FileAttributes[] attributeCombos = OS.ToString().ToLowerInvariant() switch
                 {
-                    (true, _) =>    [
+                    "windows" =>    [
                                         FileAttributes.ReadOnly,
                                         FileAttributes.ReadOnly | FileAttributes.System,
                                         FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden,
@@ -1542,7 +1544,7 @@ namespace Ionic.Zip.Tests
                                         FileAttributes.Temporary,
                                         FileAttributes.Temporary | FileAttributes.Archive,
                                     ],
-                    (_, true) =>    [
+                    "linux"   =>    [
                                         FileAttributes.ReadOnly,
                                         FileAttributes.Normal,
                                         //FileAttributes.ReadOnly | FileAttributes.Hidden,
@@ -1617,7 +1619,7 @@ namespace Ionic.Zip.Tests
         public void CreateAndExtract_SetAndVerifyAttributes()
         {
             // Fail if not either Windows or Linux
-            Assert.True(OperatingSystem.IsWindows () || OperatingSystem.IsLinux());
+            Assert.True(OS == OSPlatform.Windows || OS == OSPlatform.Linux);
 
             string marker = TestUtilities.GetMarker();
             string zipFileToCreate = Path.Combine(TopLevelDir, "CreateAndExtract_SetAndVerifyAttributes.zip");
@@ -1626,9 +1628,9 @@ namespace Ionic.Zip.Tests
             // do an exhaustive combination because (a) not all combinations are valid, and (b)
             // if you SetAttributes(file,Compressed) (also with Encrypted, ReparsePoint) it does
             // not "work."  So those attributes must be excluded.
-            FileAttributes[] attributeCombos = (OperatingSystem.IsWindows (), OperatingSystem.IsLinux()) switch
+            FileAttributes[] attributeCombos = OS.ToString().ToLowerInvariant() switch
             {
-                (true, _) =>    [
+                "windows" =>    [
                                     FileAttributes.ReadOnly,
                                     FileAttributes.ReadOnly | FileAttributes.System,
                                     FileAttributes.ReadOnly | FileAttributes.System | FileAttributes.Hidden,
@@ -1651,7 +1653,7 @@ namespace Ionic.Zip.Tests
                                     FileAttributes.Temporary,
                                     FileAttributes.Temporary | FileAttributes.Archive,
                                 ],
-                (_, true) =>    [
+                "linux"   =>    [
                                     FileAttributes.ReadOnly,
                                     FileAttributes.Normal,
                                     //FileAttributes.ReadOnly | FileAttributes.Hidden,
@@ -1714,7 +1716,7 @@ namespace Ionic.Zip.Tests
             // Local function to test if a filename is to be excluded based on operating system.
             bool isExcludedByOperatingSystem(string filename)
             {
-                if (OperatingSystem.IsLinux())
+                if (OS == OSPlatform.Linux)
                 {
                     // Test if the file is a special file type.
                     var linuxLsRes = this.Exec("ls", $"-l \"{filename}\"");

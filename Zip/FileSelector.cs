@@ -48,6 +48,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace Ionic
 {
@@ -233,28 +234,49 @@ namespace Ionic
         private String _regexString;
         internal ComparisonOperator Operator;
         private string _MatchingFileSpec;
+        
         internal virtual string MatchingFileSpec
         {
             set
             {
+                // Use the platform's directory separator
+                char sep = Path.DirectorySeparatorChar;
+
                 // workitem 8245
                 if (Directory.Exists(value))
                 {
-                    _MatchingFileSpec = ".\\" + value + "\\*.*";
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        // Relative to current directory
+                        _MatchingFileSpec = $"{value}{sep}*.*";
+                    }
+                    else
+                    {
+                        _MatchingFileSpec = $".{sep}{value}{sep}*.*";
+                    }
                 }
                 else
                 {
                     _MatchingFileSpec = value;
                 }
-
+ 
                 _regexString = "^" +
-                Regex.Escape(_MatchingFileSpec)
-                    .Replace(@"\\\*\.\*", @"\\([^\.]+|.*\.[^\\\.]*)")
-                    .Replace(@"\.\*", @"\.[^\\\.]*")
-                    .Replace(@"\*", @".*")
-                    //.Replace(@"\*", @"[^\\\.]*") // ill-conceived
-                    .Replace(@"\?", @"[^\\\.]")
+                    Regex.Escape(_MatchingFileSpec)
+                        .Replace($@"{sep}\*\.\*", sep + $@"{sep}([^\.]+|.*\.[^{sep}\.]*)")
+                        .Replace(@"\.\*", $@"\.[^{sep}\.]*")
+                        .Replace(@"\*", @".*")
+                        //.Replace(@"\*", $@"[^{sep}\.]*") // ill-conceived
+                        .Replace(@"\?", $@"[^{sep}.]")
                     + "$";
+
+                // _regexString = "^" +
+                // Regex.Escape(_MatchingFileSpec)
+                //     .Replace(@"\\\*\.\*", @"\\([^\.]+|.*\.[^\\\.]*)")
+                //     .Replace(@"\.\*", @"\.[^\\\.]*")
+                //     .Replace(@"\*", @".*")
+                //     //.Replace(@"\*", @"[^\\\.]*") // ill-conceived
+                //     .Replace(@"\?", @"[^\\\.]")
+                //     + "$";
 
                 CriterionTrace("NameCriterion regexString({0})", _regexString);
 
@@ -286,7 +308,7 @@ namespace Ionic
             CriterionTrace("NameCriterion::Evaluate({0})", fullpath);
             // No slash in the pattern implicitly means recurse, which means compare to
             // filename only, not full path.
-            String f = (_MatchingFileSpec.IndexOf('\\') == -1)
+            String f = (_MatchingFileSpec.IndexOf(Path.DirectorySeparatorChar) == -1)
                 ? System.IO.Path.GetFileName(fullpath)
                 : fullpath; // compare to fullpath
 
@@ -937,8 +959,8 @@ namespace Ionic
                     //new string[] { @"([><(?:!=)=])([^ ])", "$1 $2" },
                     new string[] { @"(>|<|!=|=)([^ =])", "$1 $2" },
 
-                    // K. replace fwd slash with backslash
-                    new string[] { @"/", "\\" },
+                    // K. replace fwd slash with Path.DirectorySeparatorChar
+                    new string[] { @"/", $"{Path.DirectorySeparatorChar}" },
                 };
 
             string interim = source;
@@ -960,7 +982,7 @@ namespace Ionic
             var regexPattern = @"/" +
                                 RegexAssertions.FollowedByOddNumberOfSingleQuotesAndLineEnd;
             // replace with backslash
-            interim = Regex.Replace(interim, regexPattern, "\\");
+            interim = Regex.Replace(interim, regexPattern, $"{Path.DirectorySeparatorChar}");
 
             // match a space, followed by an odd number of single quotes.
             // This matches spaces only inside a pair of single quote delimiters.

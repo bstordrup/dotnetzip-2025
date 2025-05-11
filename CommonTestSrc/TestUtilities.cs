@@ -178,6 +178,21 @@ namespace Ionic.Zip.Tests.Utilities
         #endregion
 
 
+        #region OS Helper methods
+
+        internal static OSPlatform GetOSPlatform()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return OSPlatform.Windows;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return OSPlatform.Linux;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) return OSPlatform.OSX;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) return OSPlatform.FreeBSD;
+            
+            throw new InvalidOperationException("OSPlatform not detected.");
+        }
+
+        #endregion
+
+
         #region Helper methods
 
         internal static string TrimVolumeAndSwapSlashes(string pathName)
@@ -751,7 +766,7 @@ namespace Ionic.Zip.Tests.Utilities
 
         internal static string GetExecutableName(string executableWithoutExtension)
         {
-            if (OperatingSystem.IsLinux())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return executableWithoutExtension;
             }

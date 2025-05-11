@@ -14,6 +14,7 @@
 //
 // ------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
 
@@ -37,6 +38,8 @@ namespace Ionic.Zip.Tests.Utilities
         private bool? _InfoZipIsPresent;
         protected static string TEMP = System.Environment.GetEnvironmentVariable("TEMP");
 
+        protected OSPlatform OS = TestUtilities.GetOSPlatform();
+        
         //protected Ionic.CopyData.Transceiver _txrx;
 
         protected ITestOutputHelper _output;

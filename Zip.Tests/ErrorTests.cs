@@ -406,7 +406,7 @@ namespace Ionic.Zip.Tests
         {
             string not_a_file_name_os_dependant()
             {
-                if (OperatingSystem.IsLinux())
+                if (OS == OSPlatform.Linux)
                 {
                     return "/usr/lib/";
                 }
