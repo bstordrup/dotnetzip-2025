@@ -1547,7 +1547,7 @@ namespace Ionic.Zip.Tests
                     {
                         string dirInArchive = new System.String(new char[] { (char)(i + 65) });
                         if (j == 1)
-                            dirInArchive += "\\";
+                            dirInArchive += Path.DirectorySeparatorChar;
                         var selected1 = zip1.SelectEntries("*.*", dirInArchive);
                         count1 += selected1.Count;
                         _output.WriteLine(

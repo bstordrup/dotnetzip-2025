@@ -262,7 +262,7 @@ namespace Ionic
  
                 _regexString = "^" +
                     Regex.Escape(_MatchingFileSpec)
-                        .Replace($@"{sep}\*\.\*", sep + $@"{sep}([^\.]+|.*\.[^{sep}\.]*)")
+                        .Replace($@"{sep}\*\.\*", $@"{sep}([^\.]+|.*\.[^{sep}\.]*)")
                         .Replace(@"\.\*", $@"\.[^{sep}\.]*")
                         .Replace(@"\*", @".*")
                         //.Replace(@"\*", $@"[^{sep}\.]*") // ill-conceived
