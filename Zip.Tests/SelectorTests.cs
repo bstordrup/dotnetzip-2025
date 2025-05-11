@@ -1822,7 +1822,7 @@ namespace Ionic.Zip.Tests
                 );
                 string d = fodderDir;
                 if (i == 1)
-                    d += "\\";
+                    d += Path.DirectorySeparatorChar;
                 _output.WriteLine("===============================================");
                 _output.WriteLine("AddSelectedFiles(cycle={0})", i);
                 using (ZipFile zip1 = new ZipFile())

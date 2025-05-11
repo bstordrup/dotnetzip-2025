@@ -1432,7 +1432,9 @@ namespace Ionic
 
             var list = new List<Ionic.Zip.ZipEntry>();
             // workitem 8559
-            string slashSwapped = (directoryPathInArchive == null) ? null : directoryPathInArchive.Replace('/', Path.DirectorySeparatorChar);
+            string slashSwapped = (directoryPathInArchive == null) 
+                ? null 
+                : directoryPathInArchive.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
             // workitem 9174
             if (slashSwapped != null)
             {
