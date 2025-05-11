@@ -1003,6 +1003,12 @@ namespace Ionic
         {
             if (s == null) return null;
 
+            //Start by replacing \ with Path.DirectorySeparatorChar n Linux.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                s = s.Replace('\\', Path.DirectorySeparatorChar);
+            }
+
             // inject spaces after open paren and before close paren, etc
             s = NormalizeCriteriaExpression(s);
 

@@ -640,13 +640,6 @@ namespace Ionic.Zip
                                                bool recurseDirectories,
                                                bool wantUpdate)
         {
-            //Start by replacing \ with Path.DirectorySeparatorChar n Linux.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                selectionCriteria = selectionCriteria.Replace('\\', Path.DirectorySeparatorChar);
-            }
-            System.Diagnostics.Debug.WriteLine($"selectionCriteria: {selectionCriteria}");
-
             if (directoryOnDisk == null && (Directory.Exists(selectionCriteria)))
             {
                 directoryOnDisk = selectionCriteria;
