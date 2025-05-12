@@ -1881,7 +1881,7 @@ namespace Ionic.Zip.Tests
             }
         }
 
-        [Fact]
+        [FactOnWindows]
         public void Twiddle_wi10153()
         {
             // workitem 10153:
@@ -1891,6 +1891,13 @@ namespace Ionic.Zip.Tests
             // argument is downcased, AND when the filename contains a ~ (weird, I
             // know), verify that the path replacement works as advertised, and entries
             // are rooted in the directoryInArchive specified path.
+
+            // This test is not relevant on Linux because it relies on the fact that
+            // Windows is case-insensitive in path names where Linux is case-sensitive.
+            // So due to the intentional change to lower case directoryOnDisk, the 
+            // test will always fail when executed on Linux. Not because of filenames
+            // not passing the Regex test, but because Directory.Exists returns false
+            // for the lower case directoryOnDisk.
 
             string zipFileToCreate = Path.Combine(TopLevelDir, "Selector_Twiddle.zip");
             string dirToZip = Path.Combine(TopLevelDir, "dirToZip");
