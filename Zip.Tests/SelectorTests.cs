@@ -2331,7 +2331,7 @@ namespace Ionic.Zip.Tests
                 // TODO: maybe replace with file.Separator
                 string selectCriteria = String.Format(
                     "name = '{0}/*.*'",
-                    childFolders[m].Replace(TopLevelDir + "\\", "")
+                    childFolders[m].Replace(TopLevelDir + Path.DirectorySeparatorChar, "")
                 );
 
                 _output.WriteLine("select:  {0}", selectCriteria);
