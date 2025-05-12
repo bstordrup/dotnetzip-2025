@@ -2230,7 +2230,8 @@ namespace Ionic.Zip.Tests
         {
             string[][] sPairs =
             {
-                new string[] { "name = '.\\Selector (this is a Test)\\this.txt'", null },
+                // Use Path.DirectorySeparatorChar to make sure the test works on all platforms
+                new string[] { $"name = '.{Path.DirectorySeparatorChar}Selector (this is a Test){Path.DirectorySeparatorChar}this.txt'", null },
                 new string[]
                 {
                     "(size > 100)AND(name='Name (with Parens).txt')",
