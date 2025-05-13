@@ -277,8 +277,20 @@ namespace Ionic.Zip.Tests.Utilities
                     string progfiles = null;
                     if (_sevenzip == null)
                     {
-                        progfiles = System.Environment.GetEnvironmentVariable("ProgramFiles");
-                        _sevenzip = Path.Combine(progfiles, "7-zip\\7z.exe");
+                        if (OS == OSPlatform.Linux)
+                        {
+                            var userLibPath = Path.Combine("/usr", "lib", "7zip", "7z");
+                            var globalLibPath = Path.Combine("/lib", "7zip", "7z");
+                            if (File.Exists(userLibPath))
+                                _sevenzip = userLibPath;
+                            else if (File.Exists(globalLibPath))
+                                _sevenzip = globalLibPath;
+                        }
+                        else
+                        {
+                            progfiles = System.Environment.GetEnvironmentVariable("ProgramFiles");
+                            _sevenzip = Path.Combine(progfiles, "7-zip\\7z.exe");
+                        }
                     }
                     _SevenZipIsPresent = new Nullable<bool>(File.Exists(_sevenzip));
                 }
