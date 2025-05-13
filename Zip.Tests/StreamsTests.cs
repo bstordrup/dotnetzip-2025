@@ -19,6 +19,7 @@
 //
 
 using System.Text;
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -1610,7 +1611,7 @@ namespace Ionic.Zip.Tests
             _Internal_Streams_7z_Zip(2, "mixed");
         }
 
-        [Fact]
+        [FactOnWindows]
         [Trait("subset", "winzip")]
         public void Streams_Winzip_Zip_Mixed_Password()
         {
@@ -1618,7 +1619,7 @@ namespace Ionic.Zip.Tests
             _Internal_Streams_WinZip_Zip(2, password, "mixed");
         }
 
-        [Fact]
+        [FactOnWindows]
         [Trait("subset", "winzip")]
         public void Streams_Winzip_Zip()
         {
