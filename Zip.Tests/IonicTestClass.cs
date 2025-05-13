@@ -279,12 +279,7 @@ namespace Ionic.Zip.Tests.Utilities
                     {
                         if (OS == OSPlatform.Linux)
                         {
-                            var userLibPath = Path.Combine("/usr", "lib", "7zip", "7z");
-                            var globalLibPath = Path.Combine("/lib", "7zip", "7z");
-                            if (File.Exists(userLibPath))
-                                _sevenzip = userLibPath;
-                            else if (File.Exists(globalLibPath))
-                                _sevenzip = globalLibPath;
+                            _sevenzip = LinuxTestUtilities.GetFromUsrOrGlobal("7z");
                         }
                         else
                         {
@@ -307,9 +302,17 @@ namespace Ionic.Zip.Tests.Utilities
                     string progfiles = null;
                     if (_infozipzip == null)
                     {
-                        progfiles = System.Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-                        _infozipzip = Path.Combine(progfiles, "infozip.org\\zip.exe");
-                        _infozipunzip = Path.Combine(progfiles, "infozip.org\\unzip.exe");
+                        if (OS == OSPlatform.Linux)
+                        {
+                            _infozipzip = LinuxTestUtilities.GetFromUsrOrGlobal("zip");
+                            _infozipunzip = LinuxTestUtilities.GetFromUsrOrGlobal("unzip");
+                        }
+                        else
+                        {
+                            progfiles = System.Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+                            _infozipzip = Path.Combine(progfiles, "infozip.org\\zip.exe");
+                            _infozipunzip = Path.Combine(progfiles, "infozip.org\\unzip.exe");
+                        }
                     }
                     _InfoZipIsPresent = new Nullable<bool>(
                         File.Exists(_infozipzip) && File.Exists(_infozipunzip)

@@ -17,6 +17,7 @@
 // ------------------------------------------------------------------
 
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Ionic.Zip.Tests.Utilities
 {
@@ -36,6 +37,16 @@ namespace Ionic.Zip.Tests.Utilities
             Debug.WriteLine($"Testing ls result {resultOfLsCommand}");
             char filetype = resultOfLsCommand[0];
             return linuxSpecialfileTypes.ContainsKey(filetype);;
+        }
+
+        public static string GetFromUsrOrGlobal(string executable)
+        {
+            var envPath = Environment.GetEnvironmentVariable("PATH");
+            var paths = envPath?.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries) ?? [];
+            return (from path in paths
+                    let fullPath = Path.Combine(path, executable)
+                    where File.Exists(fullPath)
+                    select fullPath).FirstOrDefault();
         }
     }
 
