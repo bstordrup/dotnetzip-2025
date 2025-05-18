@@ -15,6 +15,7 @@
 //
 // ------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
@@ -2299,67 +2300,44 @@ namespace Ionic.Zip.Tests
             return (marker, zipFileToCreate, dirToZip, files);
         }
 
-        [FactOnWindows]
-        public void FromRoot_wi11988_Windows()
+        private string substExe = null;
+        
+        private string CreateVirtualDrive(string dirToZip, string virtualDriveLetter)
         {
-            var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
-
-            string windir = System.Environment.GetEnvironmentVariable("Windir");
-            string substExe = Path.Combine(windir, "system32", "subst.exe");
-            Assert.True(File.Exists(substExe), $"subst.exe does not exist ({substExe})");
-
-            try
+            if (OS == OSPlatform.Windows)
             {
+                string windir = System.Environment.GetEnvironmentVariable("Windir");
+                substExe = Path.Combine(windir, "system32", "subst.exe");
+                Assert.True(File.Exists(substExe), $"subst.exe does not exist ({substExe})");
+
                 // create a subst drive
-                this.Exec(substExe, "G: " + dirToZip);
-
-                using (var zip = new ZipFile())
-                {
-                    zip.UpdateSelectedFiles("*.*", "G:\\", "", true);
-                    zip.Save(zipFileToCreate);
-                }
-
-                Assert.Equal<int>(files.Length, CountEntries(zipFileToCreate));
-                Assert.True(files.Length > 3);
-                BasicVerifyZip(zipFileToCreate);
+                this.Exec(substExe, $"{virtualDriveLetter}:\\ {dirToZip}");
+                return $"{virtualDriveLetter}:";
             }
-            finally
+            else  if (OS == OSPlatform.Linux)
             {
-                // remove the virt drive
-                this.Exec(substExe, "/D G:");
+                // The way to do the same thing as subst in Linux is to create a symbolic link
+                // using the `ln -s <path to the actual folder> <the symbolic link>`
+
+                // To mimic the Windows test, the command would be
+
+                // `ln -s <dirToZip> ~/G_drive`
+
+                // which will create the link `G_drive` in the users home folder.
+                this.Exec("ln", $"-s {dirToZip} ./{virtualDriveLetter}_drive");
+                return $"./{virtualDriveLetter}_drive";
             }
+            return null;
         }
 
-        [FactOnLinux]
-        public void FromRoot_wi11988_Linux()
+        private void RemoveVirtualDrive(string directoryOnDisk)
         {
-            var (marker, zipFileToCreate, dirToZip, files) = FromRoot_Common();
-
-            try
+            if (OS == OSPlatform.Windows)
             {
-                /*
-                    The way to do the same thing as subst in Linux is to create a symbolic link
-                    using the `ln -s <path to the actual folder> <the symbolic link>`
-
-                    To mimic the Windows test, the command would be
-
-                    `ln -s <dirToZip> ~/G_drive`
-
-                    which will create the link `G_drive` in the users home folder.
-                */
-                this.Exec("ln", $"-s {dirToZip} ./G_drive");
-
-                using (var zip = new ZipFile())
-                {
-                    zip.UpdateSelectedFiles("*.*", "./G_drive", "", true);
-                    zip.Save(zipFileToCreate);
-                }
-
-                Assert.Equal<int>(files.Length, CountEntries(zipFileToCreate));
-                Assert.True(files.Length > 3);
-                BasicVerifyZip(zipFileToCreate);
+                // remove the virt drive
+                this.Exec(substExe, $"/D {directoryOnDisk}");
             }
-            finally
+            else if (OS == OSPlatform.Linux)
             {
                 /*
                     Removing the symbolic link is a plain `rm <the symbolic link>` command.
@@ -2369,8 +2347,39 @@ namespace Ionic.Zip.Tests
                     `rm ~/G_drive`
                 */
                 // Remove the symlink
-                this.Exec("rm", "./G_drive");
+                this.Exec("rm", directoryOnDisk);
             }
         }
+
+        [Fact]
+        public void FromRoot_wi11988()
+        {
+            string marker = TestUtilities.GetMarker();
+            string zipFileToCreate = Path.Combine(TopLevelDir, "FromRoot.zip");
+            string dirToZip = Path.Combine(TopLevelDir, $"Fodder-{marker}");
+            var files = TestUtilities.GenerateFilesFlat(dirToZip);
+            string directoryOnDisk = null;
+
+            try
+            {
+                directoryOnDisk = CreateVirtualDrive(dirToZip, "G");
+                Assert.NotNull(directoryOnDisk);
+
+                using (var zip = new ZipFile())
+                {
+                    zip.UpdateSelectedFiles("*.*", directoryOnDisk, "", true);
+                    zip.Save(zipFileToCreate);
+                }
+
+                Assert.Equal<int>(files.Length, CountEntries(zipFileToCreate));
+                Assert.True(files.Length > 3);
+                BasicVerifyZip(zipFileToCreate);
+            }
+            finally
+            {
+                RemoveVirtualDrive (directoryOnDisk);
+            }
+        }
+
     }
 }
