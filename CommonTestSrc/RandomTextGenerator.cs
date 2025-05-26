@@ -32,7 +32,8 @@ namespace Ionic.Zip.Tests.Utilities
                 "https://www.gutenberg.org/cache/epub/1/pg1.txt",
 
                 // Decl of Independence, alternative source
-                "https://constitution.org/1-Constitution/usdeclar.txt",
+                // Omit - does not work.
+                //"https://constitution.org/1-Constitution/usdeclar.txt",
 
                 // The Naval War of 1812, by Theodore Roosevelt (968k)
                 "https://www.gutenberg.org/cache/epub/9104/pg9104.txt",
