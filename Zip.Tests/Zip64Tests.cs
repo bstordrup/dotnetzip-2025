@@ -1485,7 +1485,7 @@ namespace Ionic.Zip.Tests
             Assert.Equal<int>(numTotalEntries - dirCount, CountEntries(zipFileToCreate));
         }
 
-        [Fact] // Timeout(3 * 60*60*1000),  60*60*1000 = 1 hr
+        [FactOnWindows] // Timeout(3 * 60*60*1000),  60*60*1000 = 1 hr
         public void Zip64_UpdateEntryComment_wi9214_WZ()
         {
             // Should take 2.5 hrs when creating the huge files, about 1 hr when the
