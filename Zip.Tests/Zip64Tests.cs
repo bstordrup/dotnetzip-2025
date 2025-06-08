@@ -22,6 +22,7 @@
 //
 // ------------------------------------------------------------------
 
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -328,6 +329,8 @@ namespace Ionic.Zip.Tests
                 var checksums = new Dictionary<string, string>();
                 using (ZipFile zip1 = new ZipFile())
                 {
+                    // Issue 11 prevention.
+                    zip1.ParallelDeflateThreshold = -1;  // disable parallel deflate
                     string fodderDir = Path.Combine(Z64_DIR, "dir");
                     if (!Directory.Exists(fodderDir))
                     {
@@ -399,9 +402,8 @@ namespace Ionic.Zip.Tests
 
                         e.Extract(extractDir);
                         string filename = Path.Combine(extractDir, e.FileName);
-                        string actualCheckString = TestUtilities.CheckSumToString(
-                            TestUtilities.ComputeChecksum(filename)
-                        );
+                        var chk = TestUtilities.ComputeChecksum(filename);
+                        string actualCheckString = TestUtilities.CheckSumToString(chk);
                         Assert.True(checksums.ContainsKey(e.FileName), "Checksum is missing");
                         Assert.Equal(
                             checksums[e.FileName],
@@ -795,7 +797,7 @@ namespace Ionic.Zip.Tests
             }
         }
 
-        [Fact] // Timeout(3 * 60*60*1000),  60*60*1000 = 1hr
+        [FactOnWindows] // Timeout(3 * 60*60*1000),  60*60*1000 = 1hr
         public void Zip64_Update_WZ()
         {
             if (!WinZipIsPresent)
