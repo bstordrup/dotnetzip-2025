@@ -263,6 +263,8 @@ namespace Ionic.Zip.Tests
             string zipFileToCreate = Path.Combine(containingDir, HUGE_ZIPFILE_NAME);
             using (ZipFile zip = new ZipFile())
             {
+                // Issue 11 prevention
+                zip.ParallelDeflateThreshold = -1; // disable parallel deflate
                 zip.SaveProgress += SaveProgress("createhugefile");
                 zip.AddProgress += AddProgress("createhugefile");
                 zip.UpdateDirectory(fodderDir, "");
@@ -1235,6 +1237,8 @@ namespace Ionic.Zip.Tests
             var sw = new StringWriter();
             using (var zip = new ZipFile())
             {
+                // Prevent issue 11
+                zip.ParallelDeflateThreshold = -1; // disable parallel deflate
                 zip.StatusMessageTextWriter = sw;
                 zip.UseZip64WhenSaving = Zip64Option.Always;
                 zip.BufferSize = 65536 * 8; // 65536 * 8 = 512k
@@ -1427,6 +1431,8 @@ namespace Ionic.Zip.Tests
             int dirCount = 0;
             using (var zip = new ZipFile())
             {
+                // Prevent issue 11
+                zip.ParallelDeflateThreshold = -1; // disable parallel deflate
                 zip.Password = password;
                 zip.Encryption = encryption;
                 zip.CompressionLevel = compression;
@@ -1575,6 +1581,8 @@ namespace Ionic.Zip.Tests
                 $"a comment on the large entry in the zip. ({DateTime.Now.ToString("u")})";
             using (ZipFile zip = ZipFile.Read(_HugeZipFile))
             {
+                // Circumvent issue #11 by setting the ParallelDeflateThreshold to -1
+                zip.ParallelDeflateThreshold = -1; // disable parallel deflate
                 var e = zip.AddFile(nameOfFodderFile, "");
                 e.Comment = comment1;
                 zip.BufferSize = 1024 * 512;
