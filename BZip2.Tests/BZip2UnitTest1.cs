@@ -12,6 +12,7 @@
 // ------------------------------------------------------------------
 
 using System.Text;
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -355,8 +356,8 @@ namespace Ionic.BZip2.Tests
             string testSrc = TestUtilities.GetTestSrcDir();
             var dnzBzip2exe = Path.Combine(
                 testSrc,
-                "..\\Tools\\BZip2\\bin\\Debug\\net9.0",
-                "bzip2.exe"
+                "..", "Tools", "dnzbzip2", "bin", "Debug", "net9.0",
+                TestUtilities.GetExecutableName("dnzbzip2")
             );
             Assert.True(File.Exists(dnzBzip2exe), $"bzip2.exe is missing {dnzBzip2exe}");
             string decompressedFname = "ThisWillNotWork.txt";
@@ -387,17 +388,17 @@ namespace Ionic.BZip2.Tests
             });
         }
 
-        [Fact]
+        [FactOnWindows]
         public void BZ_Utility()
         {
             string tld = new String(TopLevelDir); // copy to avoid changes
             string testSrc = TestUtilities.GetTestSrcDir();
             var dnzBzip2exe = Path.GetFullPath(
-                Path.Combine(testSrc, "..\\Tools\\BZip2\\bin\\Debug\\net9.0", "bzip2.exe")
+                Path.Combine(testSrc, "..", "Tools", "dnzbzip2", "bin", "Debug", "net9.0", TestUtilities.GetExecutableName("dnzbzip2"))
             );
             Assert.True(File.Exists(dnzBzip2exe), $"bzip2.exe is missing {dnzBzip2exe}");
 
-            var unxBzip2exe = Path.Combine(testSrc, "Resources\\bzip2.exe");
+            var unxBzip2exe = Path.Combine(testSrc, "Resources", "bzip2.exe");
             Assert.True(File.Exists(unxBzip2exe), $"unxUtils bzip2.exe is missing {unxBzip2exe}");
 
             foreach (var key in TestStrings.Keys)
