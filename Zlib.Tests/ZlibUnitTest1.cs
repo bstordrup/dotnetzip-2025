@@ -12,6 +12,7 @@
 // ------------------------------------------------------------------
 
 using System.Text;
+using Ionic.Zip.Tests.Attributes;
 using Ionic.Zip.Tests.Utilities;
 using Xunit.Abstractions;
 using Assert = XunitAssertMessages.AssertM;
@@ -363,16 +364,19 @@ namespace Ionic.Zlib.Tests
             return;
         }
 
-        [Fact]
+        [FactOnWindows]
         public void GZ_Utility()
         {
             var srcDir = TestUtilities.GetTestSrcDir();
             var dnzGzipexe = Path.Combine(
                 srcDir,
                 "..",
-                "Tools\\GZip\\bin\\Debug",
+                "Tools",
+                "dnzgzip",
+                "bin",
+                "Debug",
                 "net9.0",
-                "GZip.exe"
+                TestUtilities.GetExecutableName("dnzgzip")
             );
             Assert.True(
                 File.Exists(dnzGzipexe),

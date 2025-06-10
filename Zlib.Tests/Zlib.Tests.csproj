@@ -22,6 +22,9 @@
     <Compile Include="..\CommonTestSrc\RandomTextGenerator.cs">
       <Link>RandomTextGenerator.cs</Link>
     </Compile>
+    <Compile Include="..\CommonTestSrc\xUnitFactAttributes.cs">
+      <Link>xUnitFactAttributes.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
